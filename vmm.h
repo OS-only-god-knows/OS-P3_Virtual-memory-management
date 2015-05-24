@@ -132,7 +132,7 @@ void do_OPT(PageTablePtr);//最优算法
 void do_FIFO(PageTablePtr);//先进先出
 void do_LRU(PageTablePtr);//最近最久未使用淘汰算法
 
-
+void do_init();
 /* 错误处理 */
 void do_error(ERROR_CODE);
 

@@ -44,12 +44,12 @@ void do_init()
 	srand(time(NULL));
 	time_n=0;
     	exec_times=0;
-	for(n=0;n<PAGE_SUM;n++)
+//printf("%d\n",PAGE_SUM);
+	for(n=0;n<OUTER_PAGE_TOTAL;n++)
 	{
 		outerpagetable[n].page_num=n;
 		outerpagetable[n].index_num=n*PAGE_SIZE;
-		
-		for(i=n*PAGE_SIZE;i<(n+1)*PAGE_SIZE&&i<PAGE_SUM;i++)
+		for(i=n*PAGE_SIZE;(i<(n+1)*PAGE_SIZE)&&(i<PAGE_SUM);i++)
 		{
 			pageTable[i].pageNum=i;
 			pageTable[i].filled=FALSE;
@@ -400,7 +400,7 @@ void do_print_info()
 		for(j=0;j<PAGE_SIZE;++j)
 		{
 			m=outerpagetable[i].index_num+j;
-			printf("%u\t%u\t%u\t%u\t%u\t%s\t%u\t%u\n", i, pageTable[m].pageNum,pageTable[m].blockNum, pageTable[m].filled, 
+			printf("%u\t\t%u\t\t%u\t%u\t%u\t%s\t%u\t%u\n", i, pageTable[m].pageNum,pageTable[m].blockNum, pageTable[m].filled, 
 				pageTable[m].edited, get_protype_str(str, pageTable[m].proType), 
 				pageTable[m].count, pageTable[m].virAddr);
 		}
@@ -440,6 +440,7 @@ int main(int argc, char* argv[])
 	do_print_info();
 	ptr_memAccReq = (Ptr_MemoryAccessRequest)malloc(sizeof(MemoryAccessRequest));
 	/* 在循环中模拟访存请求与处理过程 */
+
 	while (TRUE)
 	{
 		do_request();
