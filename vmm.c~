@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <linux/stat.h>
 #include <math.h>
+#include <signal.h> //
+#include<fcntl.h>  // 
 #include "vmm.h"
 
 
@@ -117,6 +119,24 @@ void do_response()
 	Ptr_PageTableItem ptr_pageTabIt;
 	unsigned int outer_page_num,in_page_offset,offset,in_page_num;
 	unsigned int actAddr,i;
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+	int count=0;
+	bzero(ptr_memAccReq,sizeof(MemoryAccessRequest));
+	if((count=read(fifo,ptr_memAccReq,sizeof(MemoryAccessRequest)))<0)
+	{
+		printf("read fifo failed");
+		exit(0);
+	}
+	if(count)
+	{
+		printf("read a req");
+	}
+	else
+	{
+		printf("no data read");
+		return;
+	}
+
 	/* 检查地址是否越界 */
 	if (ptr_memAccReq->virAddr < 0 || ptr_memAccReq->virAddr >= VIRTUAL_MEMORY_SIZE)
 	{
@@ -473,7 +493,13 @@ void do_print_info()
 		}
 	}
 }
-
+void time_change(unsigned int num)
+{
+	int i;
+	for(i=0;i<time_n-1;++i)
+		Time[i]=Time[i+1];
+	Time[time_n]=num;
+}
 /* 获取页面保护类型字符串 */
 char * get_protype_str(char *str,BYTE type)
 {
@@ -497,6 +523,7 @@ int main(int argc, char* argv[])
 {
 	char c;
 	int i;
+	struct stat statbuf;
 	if (!(ptr_auxMem = fopen(AUXILIARY_MEMORY, "r+")))
 	{
 		do_error(ERROR_FILE_OPEN_FAILED);
@@ -506,11 +533,31 @@ int main(int argc, char* argv[])
 	do_init();
 	do_print_info();
 	ptr_memAccReq = (Ptr_MemoryAccessRequest)malloc(sizeof(MemoryAccessRequest));
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+	if(stat("/tmp/server",&statbuf)==0){
+		/* 如果FIFO文件存在,删掉 */
+		if(remove("/tmp/server")<0){
+			printf("remove failed");
+			exit(0);
+		}
+	}
+
+	if(mkfifo("/tmp/server",0666)<0){
+		printf("mkfifo failed");
+		exit(0);
+	}
+	/* 在非阻塞模式下打开FIFO,返回文件描述符 */
+	if((fifo=open("/tmp/server",O_RDONLY|O_NONBLOCK))<0){
+		printf("open fifo failed");
+		exit(0);
+	}
+
+
 	/* 在循环中模拟访存请求与处理过程 */
 
 	while (TRUE)
 	{
-		do_request();
+// 		do_request();
 		do_response();
 		printf("按Y打印页表，按其他键不打印...\n");
 		if ((c = getchar()) == 'y' || c == 'Y')
