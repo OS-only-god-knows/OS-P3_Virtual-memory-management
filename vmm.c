@@ -222,7 +222,7 @@ void do_page_fault(Ptr_PageTableItem ptr_pageTabIt)
         }
     }
 	/* 没有空闲物理块，进行页面替换 */
-	printf("请选择页面淘汰算法\n FIFO:1,LFU:2,LRU:3\n");
+	printf("请选择页面淘汰算法\n LFU:1,FIFO:2,LRU:3\n");
 	while(c=getchar())
 	{
 		if(c=='1')
@@ -240,14 +240,18 @@ void do_page_fault(Ptr_PageTableItem ptr_pageTabIt)
 			do_LRU(ptr_pageTabIt);
 			break;
 		}
+		while (c != '\n')
+			c = getchar();
 	}
+	while (c != '\n')
+		c = getchar();
 }
 
 /* 根据LFU算法进行页面替换 */
 void do_LFU(Ptr_PageTableItem ptr_pageTabIt)
 {
     unsigned int i,min,page;
-    printf("没有空闲物理块，开始进行LFU页面替换...\n ");
+    printf("没有空闲物理块，开始进行LFU页面替换...\n");
     //对最小频率进行初始化
     for(i=0, min = 0xFFFFFFFF, page = 0;i<PAGE_SUM;i++)
     {
@@ -257,7 +261,7 @@ void do_LFU(Ptr_PageTableItem ptr_pageTabIt)
             page=pageTable[i].pageNum;
         }
     }
-    printf("选择第%u页进行替换/n",page);
+    printf("选择第%u页进行替换\n",page);
     if(pageTable[page].edited)
     {
 	/* 页面内容有修改，需要写回至辅存 */
@@ -286,7 +290,7 @@ void do_FIFO(Ptr_PageTableItem ptr_pageTabIt)
     unsigned int firstcome;
     firstcome=Time[0];//Time[PAGE_SUM]里面存着现在的主存里的页面存储状况，每一项是页号，第一项是先进来的页面
     printf("没有空闲物理块，开始进行FIFO页面替换...\n ");
-    printf("选择第%u页进行替换/n",firstcome);
+    printf("选择第%u页进行替换\n",firstcome);
     if(pageTable[firstcome].edited)
     {
           printf("该页内容有修改，写回至辅存.\n");
@@ -323,7 +327,7 @@ void do_LRU(Ptr_PageTableItem ptr_pageTabIt)
             page=pageTable[i].pageNum;
         }
     }
-    printf("选择第%u页进行替换/n",page);
+    printf("选择第%u页进行替换\n",page);
     if(pageTable[page].edited)
     {
         printf("该页内容有修改，写回至辅存.\n");
@@ -357,7 +361,7 @@ void do_page_in(Ptr_PageTableItem ptr_pageTabIt, unsigned int blockNum)
 		do_error(ERROR_FILE_SEEK_FAILED);
 		exit(1);
 	}
-	if((read_num=fread(&actMem[blockNum*PAGE_SIZE],sizeof(BYTE),PAGE_SIZE,ptr_auxMem))<PAGE_SIZE)
+	if((fread(&actMem[blockNum*PAGE_SIZE],sizeof(BYTE),PAGE_SIZE,ptr_auxMem))<PAGE_SIZE)
 	{
 		do_error(ERROR_FILE_READ_FAILED);
 		exit(1);

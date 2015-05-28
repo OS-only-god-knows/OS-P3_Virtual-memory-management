@@ -65,7 +65,7 @@ typedef enum {
 } ERROR_CODE;
 //===========================================================================================================//
 
-/**类似PCB结构*/
+/**结构*/
 typedef struct
 {
 	unsigned int pid;											//作业号
@@ -80,29 +80,17 @@ typedef struct
 	unsigned int index_num;										//二级页表块号
 }OuterPageTableItem,*OuterPageTablePtr;
 
-/* 页表项 */
-//typedef struct
-//{
-//	unsigned int pageNum;
-//	unsigned int blockNum; //物理块号
-//	BOOL filled; //页面装入特征位
-//	BYTE proType; //页面保护类型
-//	BOOL edited; //页面修改标识
-//	unsigned long auxAddr; //外存地址
-//	unsigned long count; //页面使用计数器
-//} PageTableItem, *Ptr_PageTableItem;
-
 /**二级页表结构**/
 typedef struct
 {
-	unsigned int pageNum;										//二级页号
-	unsigned int blockNum;										//物理内存块号
-	BOOL filled;												//特征位
-	BOOL edited;												//页面是否改变
-	BYTE proType;										//读、写、执行类型
-	unsigned long virAddr;								//虚存地址
-	unsigned long count;										//页面使用计数
-    unsigned int no_use;                                        //用来寻找最近最久未使用的页面
+	unsigned int pageNum;//二级页号
+	unsigned int blockNum;//物理内存块号
+	BOOL filled;//特征位
+	BOOL edited;//页面是否改变
+	BYTE proType;//读、写、执行类型
+	unsigned long virAddr;//虚存地址
+	unsigned long count;//页面使用计数
+	unsigned int no_use;//用来寻找最近最久未使用的页面
 }PageTableItem,*Ptr_PageTableItem;
 
 
