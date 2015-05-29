@@ -71,7 +71,7 @@ void input_request()
 			ptr_memAccReq->reqType = REQUEST_WRITE;
 			/* 产生待写入的值 */
 			printf("请输入待写入的值：\n");
-			scanf("%02X",&v);
+			scanf("%d",&v);
 			ptr_memAccReq->value = v % 0xFFu;
 			printf("产生请求：\n地址：%u\t类型：写入\t值：%02X\n", ptr_memAccReq->virAddr, ptr_memAccReq->value);
 			break;
