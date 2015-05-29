@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <linux/stat.h>
 #include <math.h>
+#include <signal.h> //
+#include<fcntl.h>  // 
 #include "vmm.h"
 
 
@@ -117,6 +119,31 @@ void do_response()
 	Ptr_PageTableItem ptr_pageTabIt;
 	unsigned int outer_page_num,in_page_offset,offset,in_page_num;
 	unsigned int actAddr,i;
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+	int count=0;
+	bzero(ptr_memAccReq,sizeof(MemoryAccessRequest));
+	if((count=read(fifo,ptr_memAccReq,sizeof(MemoryAccessRequest)))<0)
+	{
+		printf("read fifo failed\n");
+		exit(0);
+	}
+	if(count)
+	{
+		printf("read a req\n");
+		printf("产生请求：\n地址：%u\t", ptr_memAccReq->virAddr);
+		if(ptr_memAccReq->reqType==REQUEST_READ)
+			printf("类型：读取\n\n");
+		else if(ptr_memAccReq->reqType==REQUEST_WRITE)
+			printf("类型：写入\t值：%02X\n\n",ptr_memAccReq->value);
+		else if(ptr_memAccReq->reqType==REQUEST_EXECUTE)
+			printf("类型：执行\n\n");
+	}
+	else
+	{
+		printf("no data read\n");
+		return;
+	}
+
 	/* 检查地址是否越界 */
 	if (ptr_memAccReq->virAddr < 0 || ptr_memAccReq->virAddr >= VIRTUAL_MEMORY_SIZE)
 	{
@@ -507,6 +534,7 @@ int main(int argc, char* argv[])
 {
 	char c;
 	int i;
+	struct stat statbuf;
 	if (!(ptr_auxMem = fopen(AUXILIARY_MEMORY, "r+")))
 	{
 		do_error(ERROR_FILE_OPEN_FAILED);
@@ -516,11 +544,31 @@ int main(int argc, char* argv[])
 	do_init();
 	do_print_info();
 	ptr_memAccReq = (Ptr_MemoryAccessRequest)malloc(sizeof(MemoryAccessRequest));
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+	if(stat("/tmp/server",&statbuf)==0){
+		/* 如果FIFO文件存在,删掉 */
+		if(remove("/tmp/server")<0){
+			printf("remove failed\n");
+			exit(0);
+		}
+	}
+
+	if(mkfifo("/tmp/server",0666)<0){
+		printf("mkfifo failed\n");
+		exit(0);
+	}
+	/* 在非阻塞模式下打开FIFO,返回文件描述符 */
+	if((fifo=open("/tmp/server",O_RDONLY|O_NONBLOCK))<0){
+		printf("open fifo failed\n");
+		exit(0);
+	}
+
+
 	/* 在循环中模拟访存请求与处理过程 */
 
 	while (TRUE)
 	{
-		do_request();
+// 		do_request();
 		do_response();
 		printf("按Y打印页表，按其他键不打印...\n");
 		if ((c = getchar()) == 'y' || c == 'Y')
@@ -540,6 +588,7 @@ int main(int argc, char* argv[])
 		do_error(ERROR_FILE_CLOSE_FAILED);
 		exit(1);
 	}
+	close(fifo);
 	return (0);
 }
 

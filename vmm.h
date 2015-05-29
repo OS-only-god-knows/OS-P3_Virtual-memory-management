@@ -103,6 +103,7 @@ typedef struct
 	BYTE value; //写请求的值
 } MemoryAccessRequest, *Ptr_MemoryAccessRequest;
 
+int fifo ;
 
 //===========================================================================================================//
 
