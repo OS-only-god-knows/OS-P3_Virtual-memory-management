@@ -83,7 +83,7 @@ void input_request()
 			break;
 		}
 		default:
-			printf("非法输入");
+			printf("无效输入\n");
 			exit(0);
 			break;
 	}	
