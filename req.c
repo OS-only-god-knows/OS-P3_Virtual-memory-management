@@ -143,7 +143,8 @@ int main()
 		{
 			printf("write to fifo failed");
 		}
+		close(fd);
 	}
-	close(fd);
+//	close(fd);
 	return 0;
 }
