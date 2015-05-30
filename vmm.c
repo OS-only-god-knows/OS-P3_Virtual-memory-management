@@ -492,17 +492,21 @@ void do_print_info()
 {
 	unsigned int i,j,m;
 	unsigned char str[4];
+	BYTE buf[256];
+	fgets(buf,256,ptr_auxMem);
 	printf("一级页号\t二级页号\t块号\t装入\t修改\t保护\t计数\t辅存\n");
 	for(i=0;i<OUTER_PAGE_TOTAL;++i)
 	{
 		for(j=0;j<PAGE_SIZE;++j)
 		{
 			m=outerpagetable[i].index_num+j;
-			printf("%u\t\t%u\t\t%u\t%u\t%u\t%s\t%u\t%u\n", i, pageTable[m].pageNum,pageTable[m].blockNum, pageTable[m].filled, 
+			printf("%u\t\t%u\t\t%u\t%u\t%u\t%s\t%u\t%u\t%02X\n", i, pageTable[m].pageNum,pageTable[m].blockNum, pageTable[m].filled, 
 				pageTable[m].edited, get_protype_str(str, pageTable[m].proType), 
-				pageTable[m].count, pageTable[m].virAddr);
+				pageTable[m].count, pageTable[m].virAddr,buf[pageTable[m].virAddr/8]);
 		}
 	}
+	for(i=0;i<ACTUAL_MEMORY_SIZE;i++)
+		printf("%u\t%u\t%02X\n",i/4,i%4,actMem[i]);
 }
 void time_change(unsigned int num)
 {
@@ -533,14 +537,15 @@ char * get_protype_str(char *str,BYTE type)
 int main(int argc, char* argv[])
 {
 	char c;
-	int i;
+	int i,j;
+	int m;
 	struct stat statbuf;
 	if (!(ptr_auxMem = fopen(AUXILIARY_MEMORY, "r+")))
 	{
 		do_error(ERROR_FILE_OPEN_FAILED);
 		exit(1);
 	}
-
+	
 	do_init();
 	do_print_info();
 	ptr_memAccReq = (Ptr_MemoryAccessRequest)malloc(sizeof(MemoryAccessRequest));
